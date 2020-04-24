@@ -10,6 +10,7 @@ import axios from 'axios'
 import qs from 'qs'
 import vuex from 'vuex'
 import createStore from './store/store'
+import './assets/css/base.css'
 Vue.use(ElementUI)
 
 axios.defaults.withCredentials = true;

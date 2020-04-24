@@ -8,15 +8,11 @@
     </div>
     <!-- 中心点 -->
     <div class="templateImportBox">
-      <el-tag class="editor" @click="setCenter">设置中心点</el-tag>
+      <el-tag class="editor" @click="handleOpenConfigCenterNode">设置中心点</el-tag>
     </div>
-    <el-dialog
-      title="设置中心点服务点"
-      :visible.sync="dialogVisible"
-      width="600px"
-      :before-close="handleClose"
-    >
+    <el-dialog title="设置中心点服务点" :visible.sync="dialogVisible">
       <el-transfer
+        class="transfer"
         filterable
         :filter-method="filterMethod"
         filter-placeholder="请输入地点名"
@@ -63,7 +59,11 @@
       </span>
     </el-dialog>
 
-    <el-table :data="tableData" ref="multipleTable" style="cursor: pointer;width: 780px;margin:0px auto;" >
+    <el-table
+      :data="tableData"
+      ref="multipleTable"
+      style="cursor: pointer;width: 780px;margin:0px auto;"
+    >
       <el-table-column label="地址名称" width="140">
         <template slot-scope="scope">
           <span @click="toSingePoint(scope.row)">{{ scope.row.nodeName }}</span>
@@ -121,19 +121,19 @@
 </template>
 
 <script>
-import FooterFooter from "./Footer.vue";
+import FooterFooter from "./Footer.vue"
 export default {
   name: "Index",
   data() {
     return {
       currentPage: 1,
-      excelUp: "", //excel导点
+      excelUp: "", // excel导点
       centerDialogVisible: false,
-      dialogVisible: false, //中心点
+      dialogVisible: false, // 中心点
       data2: [],
       rightValue: [],
       filterMethod(query, item) {
-        return item.pinyin.indexOf(query) > -1;
+        return item.pinyin.indexOf(query) > -1
       },
       centerPoint: [],
       serverPoint: [],
@@ -153,10 +153,10 @@ export default {
         //     "https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100"
         // }
       ]
-    };
+    }
   },
   components: {
-    FooterFooter,
+    FooterFooter
   },
   methods: {
     // handleEdit (index, row) {
@@ -166,9 +166,9 @@ export default {
 删除项目
 */
     handleDelete(index, row) {
-      let that = this;
-      console.log(index, row);
-      console.log(this.tableData[index]);
+      let that = this
+      console.log(index, row)
+      console.log(this.tableData[index])
       this.$axios
         .delete(that.$url + "/node/deleteNode", {
           params: {
@@ -177,26 +177,25 @@ export default {
           }
         })
         .then(function(response) {
-          console.log(response);
-          if (response.data.status == 0) {
-          that.$notify({
-            title: "成功",
-            message: "点" + that.tableData[index].nodeName + "删除成功",
-            type: "success"
-          });
-          that.tableData.splice(index, 1);
+          console.log(response)
+          if (response.data.status === 0) {
+            that.$notify({
+              title: "成功",
+              message: "点" + that.tableData[index].nodeName + "删除成功",
+              type: "success"
+            })
+            that.tableData.splice(index, 1)
           } else {
             that.$notify({
-            title: "警告",
-            message: response.data.msg,
-            type: "warning"
-          });
+              title: "警告",
+              message: response.data.msg,
+              type: "warning"
+            })
           }
-
         })
         .catch(function(error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
     /*
 添加项目
@@ -206,43 +205,43 @@ export default {
     //   this.tableData.unshift(value);
     // },
     handleSizeChange(val) {
-      console.log(`每页 ${val} 条`);
+      console.log(`每页 ${val} 条`)
     },
     handleCurrentChange(val) {
-      console.log(`当前页: ${val}`);
+      console.log(`当前页: ${val}`)
     },
     /*
 跳转准备数据界面
 */
     prepareData(index, row) {
-      console.log(index, row);
-      this.$router.push({ path: "/DataPerpare", query: { id: "1" } });
+      console.log(index, row)
+      this.$router.push({ path: "/DataPerpare", query: { id: "1" } })
     },
-    //文件上传函数
+    // 文件上传函数
     submitUpload() {
-      console.log();
-      this.$refs.upload.submit();
+      console.log()
+      this.$refs.upload.submit()
     },
     handleChange(file, fileList) {
-      let that = this;
-      this.fileList = fileList.slice(-3);
-      console.log(that.fileList);
-      if (that.fileList[0].status == "success") {
-        if (that.fileList[0].response.status == 0) {
-          that.getAllpoinit();
+      let that = this
+      this.fileList = fileList.slice(-3)
+      console.log(that.fileList)
+      if (that.fileList[0].status === "success") {
+        if (that.fileList[0].response.status === 0) {
+          that.getAllpoinit()
         }
       }
     },
     handleRemove(file, fileList) {
-      console.log(file, fileList);
+      console.log(file, fileList)
     },
     handlePreview(file) {
-      console.log(file);
+      console.log(file)
     },
 
-    //获取改问题下面所有点信息
+    // 获取该问题下面所有点信息
     getAllpoinit() {
-      let that = this;
+      let that = this
       this.$axios
         .get(this.$url + "/node/getQuestionNodes", {
           params: {
@@ -250,159 +249,185 @@ export default {
           }
         })
         .then(res => {
-          if (res.data.status == 0) {
-          //显示为服务点
-          for (let i in that.tableData) {
-            if (that.tableData[i].isCenter == 0) {
-            } else {
-              that.rightValue.push(parseInt(i));
+          if (res.data.status === 0) {
+            // 显示为服务点
+            for (let i in that.tableData) {
+              if (that.tableData[i].isCenter === 1) {
+                that.rightValue.push(parseInt(i))
+              }
             }
-          }
-          console.log("server" + that.serverPoint);
-          console.log("center" + that.centerPoint);
           } else {
             that.$notify({
               title: "警告",
-              message: response.data.msg,
+              message: res.data.msg,
               type: "warning"
-            });
+            })
           }
-          console.log(res);
-          that.tableData = res.data.object;
-
-
+          console.log(res)
+          that.tableData = res.data.object
         })
-        .then(data => {});
+        .then(data => {})
     },
-    //是否为中心点
+    handleOpenConfigCenterNode() {
+      console.log("get rightValue")
+      console.log(this.rightValue)
+      if (this.data2.length === 0) {
+        this.generateData2(this.tableData)
+      }
+      if (this.rightValue.length === 0) {
+        console.log("config rightValue")
+        this.initailRightValue()
+      }
+      this.dialogVisible = true
+    },
+    // 初始化rightValue数据
+    initailRightValue() {
+      let rightValue = []
+      for (let i in this.tableData) {
+        if (this.tableData[i].isCenter === 1) {
+          rightValue.push(parseInt(i))
+        }
+      }
+      this.rightValue = rightValue
+    },
+    // 获得点数据
+    getTableData() {
+      this.$axios
+        .get(this.$url + "/node/getQuestionNodes", {
+          params: {
+            questionId: this.questionId
+          }
+        })
+        .then(res => {
+          if (res.data.status === 0) {
+            this.tableData = res.data.object
+          }
+        })
+    },
+    // 是否为中心点
     isCenter(value) {
-      return value == 0 ? "否" : "是";
+      return value === 0 ? "否" : "是"
     },
-    //中心点遮罩层
+    // 中心点遮罩层
     handleClose(done) {
       this.$confirm("确认关闭？")
         .then(_ => {
-          done();
+          done()
         })
-        .catch(_ => {});
+        .catch(_ => {})
     },
     generateData2(arr) {
-      console.log(arr);
-      let data = [];
-      //let cities = ["上海", "北京", "广州", "深圳", "南京", "西安", "成都"];
-      let cities = [];
+      console.log("得到数据")
+      console.log(arr)
+      let data = []
+      // let cities = ["上海", "北京", "广州", "深圳", "南京", "西安", "成都"];
+      let cities = []
       for (let i in arr) {
-        cities.push(arr[i].nodeName);
+        cities.push(arr[i].nodeName)
       }
-      let pinyin = cities;
+      let pinyin = cities
       cities.forEach((city, index) => {
         data.push({
           label: city,
           key: index,
           pinyin: pinyin[index]
-        });
-      });
-      this.data2 = data;
+        })
+      })
+      this.data2 = data
     },
     setCenter() {
-      this.getAllpoinit();
-      this.dialogVisible = true;
-      this.generateData2(this.tableData);
+      this.getAllpoinit()
+      this.dialogVisible = true
+      this.generateData2(this.tableData)
     },
     centerChange(value, direction, movedKeys) {
-      console.log(value, direction, movedKeys);
-      if (direction == "right") {
-        console.log("设置中心点");
-        console.log(movedKeys);
-        this.changeCenter(movedKeys);
+      if (direction === "right") {
+        console.log("设置中心点")
+        this.changeCenter(movedKeys)
       } else {
-        console.log("设置服务点");
-        this.changeServer(movedKeys);
+        console.log("设置服务点")
+        this.changeServer(movedKeys)
       }
     },
-    updateNode(res,isCenter) {
-      console.log(res);
-      let that = this;
+    updateNode(indexKey, isCenter) {
+      let that = this
+      let row = this.tableData[indexKey]
+      let tableData = this.tableData
       this.$axios
         .patch(
           this.$url + "/node/updateNode",
-             that.$qs.stringify({
-              nodeId: res.nodeId,
-              questionId: that.questionId,
-              nodeName: res.nodeName,
-              nodeAddress: res.nodeAddress,
-              lat: res.lat,
-              lng: res.lng,
-              isCenter: isCenter
-          }),
+          that.$qs.stringify({
+            nodeId: row.nodeId,
+            questionId: that.questionId,
+            nodeName: row.nodeName,
+            nodeAddress: row.nodeAddress,
+            lat: row.lat,
+            lng: row.lng,
+            isCenter: isCenter
+          })
         )
         .then(res1 => {
-          console.log(111111111);
-          console.log(res1);
-          if (res1.data.status == 0) {
-            console.log(11111111);
+          if (res1.data.status === 0) {
             that.$notify({
-            title: '成功',
-            message: '点'+ res.nodeName + '设置成功',
-            type: 'success'
-        });
-                  that.getAllpoinit();
-          }  else {
+              title: "成功",
+              message: "点" + row.nodeName + "设置成功",
+              type: "success"
+            })
+            tableData[indexKey].isCenter === 0
+              ? (tableData[indexKey].isCenter = 1)
+              : (tableData[indexKey].isCenter = 0)
+          } else {
             that.$notify({
               title: "警告",
-              message: response.data.msg,
+              message: res1.data.msg,
               type: "warning"
-            });
+            })
           }
-
         })
-          .catch(function (error) {
-            this.$notify.error({
-          title: '错误',
-          message: '请刷新界面重新设置'
-        });
-  })
+        .catch(function(error) {
+          this.$notify.error({
+            title: "错误",
+            message: "请刷新界面重新设置"
+          })
+        })
     },
-    //变为中心点
+    // 变为中心点
     changeCenter(movedKeys) {
-
-      let that = this;
+      let that = this
       for (let i in movedKeys) {
-        console.log(movedKeys[i]);
-        that.updateNode(that.tableData[movedKeys[i]],'1');
+        console.log(movedKeys[i])
+        that.updateNode(movedKeys[i], "1")
       }
     },
-    //变为服务点
+    // 变为服务点
     changeServer(movedKeys) {
-      let that = this;
+      let that = this
       for (let i in movedKeys) {
-        console.log(movedKeys[i]);
-        that.updateNode(that.tableData[movedKeys[i]],'0');
+        console.log(movedKeys[i])
+        that.updateNode(movedKeys[i], "0")
       }
     },
-    //查看单一点
-    toSingePoint (row) {
+    // 查看单一点
+    toSingePoint(row) {
       this.$router.push({
         path: "/SinglePoint",
-        query: { 
+        query: {
           lat: row.lat,
           lng: row.lng,
           nodeAddress: row.nodeAddress
         }
-      });
+      })
     }
   },
-  beforeCreate() {
-
-  },
+  beforeCreate() {},
   mounted() {
-    let that = this;
-    that.excelUp = that.$url + "/node/excelNodeInfo/" + this.$route.query.id;
-    console.log(that.excelUp);
-    that.questionId = this.$route.query.id;
-    that.getAllpoinit();
+    let that = this
+    that.excelUp = that.$url + "/node/excelNodeInfo/" + this.$route.query.id
+    console.log(that.excelUp)
+    that.questionId = this.$route.query.id
+    that.getAllpoinit()
   }
-};
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

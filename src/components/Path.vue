@@ -346,7 +346,7 @@ export default {
                     new BMap.Size(52, 26),
                     { anchor: new BMap.Size(27, 13) }
                   ),
-                  speed: 1000,
+                  speed: 2500,
                   enableRotation: true, //是否设置marker随着道路的走向进行旋转,
                   length:1
                 }).start();
