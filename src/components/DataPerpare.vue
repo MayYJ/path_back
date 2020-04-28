@@ -84,7 +84,7 @@ export default {
     getAllpoinit () {
       let that = this
       this.$axios
-        .get(this.$url + "/node/getQuestionNodes", {
+        .get(this.$url + "/node/getAllQuestionNodes", {
           params: {
             questionId: that.$route.query.id
           }
@@ -113,7 +113,7 @@ export default {
       let that = this
       // that.toReload();
       this.$axios
-        .get(this.$url + "/node/getQuestionNodes", {
+        .get(this.$url + "/node/getAllQuestionNodes", {
           params: {
             questionId: that.$route.query.id
           }

@@ -110,7 +110,7 @@ export default {
 
       // 获取改问题下面所有点信息
       this.$axios
-        .get(this.$url + "/node/getQuestionNodes", {
+        .get(this.$url + "/node/getAllQuestionNodes", {
           params: {
             questionId: that.$route.query.id
           }

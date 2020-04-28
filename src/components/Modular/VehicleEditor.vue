@@ -10,7 +10,7 @@
       <el-tag class="editor" @click="setCenter">手动增加车辆</el-tag>
     </div>
     <el-dialog :before-close="handleClose" title="车辆信息" style :visible.sync="dialogFormVisible">
-      <el-form 
+      <el-form
         :model="form"
         status-icon
         :rules="rules2"
@@ -46,25 +46,31 @@
       center
       style="font-family:PingFang SC"
     >
-      <el-upload
-        class="upload-demo"
-        ref="upload"
-        :action="uploadV"
-        :on-preview="handlePreview"
-        :on-remove="handleRemove"
-        :file-list="fileList"
-        :auto-upload="false"
-        :on-change="handleChange"
-      >
-        <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-        <el-button
-          style="margin-left: 10px;"
-          size="small"
-          type="success"
-          @click="submitUpload"
-        >上传到服务器</el-button>
-        <div slot="tip" class="el-upload__tip">上传文件</div>
-      </el-upload>
+      <div style="margin-bottom: 20px;">
+        <span>点击<a :href="$url + '/vehicleSystem/downloadVehicleFile'">下载</a></span>车辆模板文件
+      </div>
+      <el-divider></el-divider>
+      <div>
+        <el-upload
+          class="upload-demo"
+          ref="upload"
+          :action="uploadV"
+          :on-preview="handlePreview"
+          :on-remove="handleRemove"
+          :file-list="fileList"
+          :auto-upload="false"
+          :on-change="handleChange"
+        >
+          <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+          <el-button
+            style="margin-left: 10px;"
+            size="small"
+            type="success"
+            @click="submitUpload"
+          >上传到服务器</el-button>
+          <div slot="tip" class="el-upload__tip">上传文件</div>
+        </el-upload>
+      </div>
       <span slot="footer" class="dialog-footer">
         <el-button @click="centerDialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="centerDialogVisible = false">确 定</el-button>
@@ -109,73 +115,73 @@
 </template>
 
 <script>
-import FooterFooter from "./Footer.vue";
+import FooterFooter from "./Footer.vue"
 export default {
   name: "VehicleList",
   data() {
-      //车辆类型
-    var testType= (rule, value, callback) => {
+    //车辆类型
+    var testType = (rule, value, callback) => {
       if (!value) {
-        return callback(new Error("车辆类型不能为空"));
+        return callback(new Error("车辆类型不能为空"))
       }
       setTimeout(() => {
-            callback();
-      }, 500);
-    };
+        callback()
+      }, 500)
+    }
     //车辆容量
     var testCapacity = (rule, value, callback) => {
       if (!value) {
-        return callback(new Error("车辆容量不能为空"));
+        return callback(new Error("车辆容量不能为空"))
       }
-      setTimeout(() => {  
-        let reg=/^[0-9]*$/;//汉字   
-        // let reg=/^[0-9]*$/;  
+      setTimeout(() => {
+        let reg = /^[0-9]*$/ //汉字
+        // let reg=/^[0-9]*$/;
         if (!reg.test(value)) {
-          callback(new Error("请输入数字"));
+          callback(new Error("请输入数字"))
         } else {
-            callback();
+          callback()
         }
-      }, 500);
-    };
-        //耗油量
+      }, 500)
+    }
+    //耗油量
     var testOil = (rule, value, callback) => {
       if (!value) {
-        return callback(new Error("用户名不能为空"));
+        return callback(new Error("用户名不能为空"))
       }
-      setTimeout(() => {  
-        let reg=/^[0-9]*$/;//汉字   
-        // let reg=/^[0-9]*$/;  
+      setTimeout(() => {
+        let reg = /^[0-9]*$/ //汉字
+        // let reg=/^[0-9]*$/;
         if (!reg.test(value)) {
-          callback(new Error("请输入数字"));
+          callback(new Error("请输入数字"))
         } else {
-            callback();
+          callback()
         }
-      }, 500);
-    };
-        //车辆价格
+      }, 500)
+    }
+    //车辆价格
     var testPrice = (rule, value, callback) => {
       if (!value) {
-        return callback(new Error("用户名不能为空"));
+        return callback(new Error("用户名不能为空"))
       }
-      setTimeout(() => {  
-        let reg=/^[0-9]*$/;//汉字   
-        // let reg=/^[0-9]*$/;  
+      setTimeout(() => {
+        let reg = /^[0-9]*$/ //汉字
+        // let reg=/^[0-9]*$/;
         if (!reg.test(value)) {
-          callback(new Error("请输入数字"));
+          callback(new Error("请输入数字"))
         } else {
-            callback();
+          callback()
         }
-      }, 500);
-    };
-        //日期
+      }, 500)
+    }
+    //日期
     var testDate = (rule, value, callback) => {
       if (!value) {
-        return callback(new Error("用户名不能为空"));
+        return callback(new Error("用户名不能为空"))
       }
-      setTimeout(() => {  
-            callback();
-      }, 500);
-    };
+      setTimeout(() => {
+        callback()
+      }, 500)
+    }
 
     return {
       tableData: [
@@ -205,20 +211,20 @@ export default {
         date: [{ validator: testDate, trigger: "blur" }]
       },
       formLabelWidth: "120px"
-    };
+    }
   },
   components: {
-    FooterFooter,
+    FooterFooter
   },
   methods: {
     handleEdit(index, row) {
-      console.log(index, row);
+      console.log(index, row)
     },
     handleDelete(index, row) {
-      let that = this;
-      console.log(index, row);
+      let that = this
+      console.log(index, row)
       //this.tableData.splice(index, 1);
-      console.log(that.tableData[index]);
+      console.log(that.tableData[index])
       this.$axios
         .delete(
           that.$url + "/vehicleSystem/user/vehicle",
@@ -235,15 +241,15 @@ export default {
           }
         )
         .then(function(response) {
-          console.log(response);
+          console.log(response)
           if (response.data.status == 0) {
-            that.tableData.splice(index, 1);
-          }  else {
+            that.tableData.splice(index, 1)
+          } else {
             that.$notify({
               title: "警告",
               message: response.data.msg,
               type: "warning"
-            });
+            })
           }
           // that.$notify({
           //   title: "警告",
@@ -253,32 +259,32 @@ export default {
           //
         })
         .catch(function(error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
     //文件上传函数
     submitUpload() {
-      this.$refs.upload.submit();
+      this.$refs.upload.submit()
     },
     handleChange(file, fileList) {
-      let that = this;
-      this.fileList = fileList.slice(-3);
-      console.log(that.fileList);
+      let that = this
+      this.fileList = fileList.slice(-3)
+      console.log(that.fileList)
       if (that.fileList[0].status == "success") {
         if (that.fileList[0].response.status == 0) {
-          that.getAllV();
+          that.getAllV()
         }
       }
     },
     handleRemove(file, fileList) {
-      console.log(file, fileList);
+      console.log(file, fileList)
     },
     handlePreview(file) {
-      console.log(file);
+      console.log(file)
     },
     //获取车辆信息
     getAllV() {
-      let that = this;
+      let that = this
       that.$axios
         .get(that.$url + "/vehicleSystem/user/vehicle", {
           params: {
@@ -287,29 +293,28 @@ export default {
         })
         .then(function(response) {
           if (response.data.status == 0) {
-            console.log(response);
-            that.tableData = response.data.object;
+            console.log(response)
+            that.tableData = response.data.object
           } else {
             that.$notify({
               title: "警告",
               message: response.data.msg,
               type: "warning"
-            });
+            })
           }
-
         })
         .catch(function(error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
     //打开增加车辆
     setCenter() {
-      this.dialogFormVisible = true;
+      this.dialogFormVisible = true
     },
     //提交车辆
     //提交车辆验证
     handsubmit() {
-      console.log(this.form);
+      console.log(this.form)
       console.log(
         this.form.date.getFullYear() +
           "-" +
@@ -320,8 +325,8 @@ export default {
           (this.form.date.getDate() < 10
             ? "0" + this.form.date.getDate()
             : this.form.date.getDate())
-      );
-      let that = this;
+      )
+      let that = this
       if (
         this.form.type != "" &&
         this.form.capacity != "" &&
@@ -357,57 +362,56 @@ export default {
                 title: "成功",
                 message: "车辆添加成功",
                 type: "success"
-              });
-              this.dialogFormVisible = false;
+              })
+              this.dialogFormVisible = false
               that.form = {
                 type: "",
                 capacity: "",
                 oil: "",
                 price: "",
                 date: ""
-              };
-            console.log(res);
-            that.getAllV();
-            }  else {
-            that.$notify({
-              title: "警告",
-              message: response.data.msg,
-              type: "warning"
-            });
-          }
-
-          });
+              }
+              console.log(res)
+              that.getAllV()
+            } else {
+              that.$notify({
+                title: "警告",
+                message: response.data.msg,
+                type: "warning"
+              })
+            }
+          })
       }
     },
     //提交车辆验证
     handsubmitTest(formName) {
-      let that = this;
+      let that = this
       this.$refs[formName].validate(valid => {
         if (valid) {
           //alert("submit!");
           that.handsubmit()
         } else {
-          console.log("error submit!!");
-          return false;
+          console.log("error submit!!")
+          return false
         }
-      });
+      })
     },
     handleClose(done) {
       this.$confirm("确认关闭？")
         .then(_ => {
-          done();
+          done()
         })
-        .catch(_ => {});
+        .catch(_ => {})
     }
   },
   mounted() {
-    console.log(this.$route.query.id);
-    let that = this;
+    console.log(this.$route.query.id)
+    let that = this
     that.uploadV =
-      this.$url + "/vehicleSystem/excelVehicleInfo/" + this.$route.query.id;
-    that.getAllV();
+      this.$url + "/vehicleSystem/excelVehicleInfo/" + this.$route.query.id
+    that.getAllV()
   }
-};
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

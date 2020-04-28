@@ -22,14 +22,22 @@
         :file-list="fileList"
         :auto-upload="false"
       >
-        <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-        <el-button
-          style="margin-left: 10px;"
-          size="small"
-          type="success"
-          @click="submitUpload"
-        >上传到服务器</el-button>
-        <div slot="tip" class="el-upload__tip">上传文件</div>
+        <div style="margin-bottom: 20px;">
+          <span style="display: block; font-size: 15px; margin-bottom: 8px">下载车辆模板文件</span>
+          <el-button style="display: block" size="small" type="primary">下载文件</el-button>
+        </div>
+        <el-divider></el-divider>
+        <div>
+          <span style="display: block; font-size: 15px; margin-bottom: 8px">上传点信息</span>
+          <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+          <el-button
+            style="margin-left: 10px;"
+            size="small"
+            type="success"
+            @click="submitUpload"
+          >上传到服务器</el-button>
+          <div slot="tip" class="el-upload__tip">上传文件</div>
+        </div>
       </el-upload>
       <span slot="footer" class="dialog-footer">
         <el-button @click="centerDialogVisible = false">取 消</el-button>
@@ -89,26 +97,29 @@ export default {
       centerDialogVisible: false,
       fileList: [],
       uploadV: "" //车辆excel上传地址
-    };
+    }
   },
   methods: {
     handleEdit(index, row) {
-      console.log(index, row);
+      console.log(index, row)
     },
     handleDelete(index, row) {
-      let that = this;
-      console.log(index, row);
+      let that = this
+      console.log(index, row)
       //this.tableData.splice(index, 1);
-      console.log(that.tableData[index]);
+      console.log(that.tableData[index])
       this.$axios
-        .delete(that.$url + "/vehicleSystem/user/vehicle", {params: [that.tableData[index]]},{
-                headers: {
-                'content-type': 'application/json;charset=UTF-8'
-                }}
-        
+        .delete(
+          that.$url + "/vehicleSystem/user/vehicle",
+          { params: [that.tableData[index]] },
+          {
+            headers: {
+              "content-type": "application/json;charset=UTF-8"
+            }
+          }
         )
         .then(function(response) {
-          console.log(response);
+          console.log(response)
           // that.$notify({
           //   title: "警告",
           //   message: "点" + that.tableData[index].nodeName + "删除成功",
@@ -117,22 +128,22 @@ export default {
           // that.tableData.splice(index, 1);
         })
         .catch(function(error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
     //文件上传函数
     submitUpload() {
-      this.$refs.upload.submit();
+      this.$refs.upload.submit()
     },
     handleRemove(file, fileList) {
-      console.log(file, fileList);
+      console.log(file, fileList)
     },
     handlePreview(file) {
-      console.log(file);
+      console.log(file)
     },
     //获取车辆信息
     getAllV() {
-      let that = this;
+      let that = this
       that.$axios
         .get(that.$url + "/vehicleSystem/user/vehicle", {
           params: {
@@ -141,21 +152,21 @@ export default {
         })
         .then(function(response) {
           console.log(response)
-          that.tableData = response.data.object;
+          that.tableData = response.data.object
         })
         .catch(function(error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     }
   },
   mounted() {
-    console.log(this.$route.query.id);
-    let that = this;
+    console.log(this.$route.query.id)
+    let that = this
     that.uploadV =
-      this.$url + "/vehicleSystem/excelVehicleInfo/" + this.$route.query.id;
-    that.getAllV();
+      this.$url + "/vehicleSystem/excelVehicleInfo/" + this.$route.query.id
+    that.getAllV()
   }
-};
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

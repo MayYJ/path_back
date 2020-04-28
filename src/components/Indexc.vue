@@ -1,11 +1,7 @@
 <template>
   <div class="from">
     <el-table :data="tableData" style="width: 1000px;margin:0px auto;">
-      <el-table-column label="项目ID" width="140">
-        <template slot-scope="scope">
-          <span>{{ scope.row.id }}</span>
-        </template>
-      </el-table-column>
+      <el-table-column type="index" width="140"></el-table-column>
       <el-table-column label="项目名称" width="140">
         <template slot-scope="scope">
           <!-- <el-popover trigger="hover" placement="top">
@@ -22,9 +18,7 @@
         <template slot-scope="scope">
           <span
             @click="prepareData(scope.$index, scope.row)"
-            class="mouseIn"
-            :class="{'waitToChoose': scope.row.prepareDataState === '进行准备' || scope.row.prepareDataState === '正在准备'}"
-            disabled
+            class="mouseIn waitToChoose"
           >{{ scope.row.prepareDataState}}</span>
         </template>
       </el-table-column>
@@ -33,6 +27,7 @@
           <span
             class="mouseIn"
             @click="workDistance(scope.$index, scope.row)"
+            :class="{'waitToChoose': scope.row.checkDataState !== '计算完成', 'disabled': scope.row.checkDataState === '计算完成'}"
           >{{ scope.row.checkDataState }}</span>
         </template>
       </el-table-column>
@@ -67,22 +62,28 @@
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
       :current-page.sync="currentPage"
-      :page-size="10"
+      :page-size="pageSize"
       layout="prev, pager, next, jumper"
-      :total="1000"
+      :total="total"
+      hide-on-single-page
     ></el-pagination>
 
     <!-- 算法选择遮罩层 -->
     <el-dialog title="算法选择" :visible.sync="dialogVisible" width="350px">
-      <el-select v-model="value" placeholder="请选择">
-        <el-option
-          v-for="item in options"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value"
-        ></el-option>
-      </el-select>
-      <el-button type="primary" @click="implement">执行</el-button>
+      <div v-if="options.length != 0">
+        <el-select v-model="value" placeholder="请选择">
+          <el-option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          ></el-option>
+        </el-select>
+        <el-button type="primary" @click="implement">执行</el-button>
+      </div>
+      <div v-if="options.length === 0" class="no-algorithm">
+        <span>没有算法可以执行</span>
+      </div>
       <el-table :data="yizhixing" style="300px" v-if="yizhixing.length != 0">
         <el-table-column label="已执行完成" width="150">
           <template slot-scope="scope">
@@ -111,20 +112,15 @@
     </el-dialog>
 
     <!-- 查看结果遮罩层 -->
-    <el-dialog title="算法详情" :visible.sync="dialogVisible1" width="350px">
-      <el-table :data="yizhixing" style="250" v-if="yizhixing.length != 0">
-        <el-table-column label="已执行完成" width="150">
-          <template slot-scope="scope">
-            <span class="mouseIn">{{ scope.row.value }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column width="50">
-          <template slot-scope="scope">
-            <span class="mouseIn" style="display:none">{{ scope.row.key }}</span>
-            <span class="mouseIn" @click="checkAlgorithm(scope.$index, scope.row)">查看</span>
-          </template>
-        </el-table-column>
-      </el-table>
+    <el-dialog title="算法结果详情" :visible.sync="dialogVisible1" width="350px">
+      <ul style="list-style-type: none; padding: 0px">
+        <li v-for="item,index in yizhixing" >
+          <div class="result-item" :class="{'result-item-last': index === yizhixing.length-1}">
+            <span class="mouseIn result-item-1">{{item.value}}</span>
+            <span class="waitToChoose result-item-2" @click="checkAlgorithm(index, item)">查看</span>
+          </div>
+        </li>
+      </ul>
       <!-- <el-table :data="zhengzaizhixing" style="300px" v-if="zhengzaizhixing.length != 0">
         <el-table-column label="正在执行" width="150">
           <template slot-scope="scope">
@@ -146,19 +142,21 @@ export default {
   name: "Index",
   data() {
     return {
-      currentPage: 1,
       tableData: [],
-      list: [], //获取数据
+      list: [], // 获取数据
       dialogVisible: false,
       options: [],
-      valueId: "", //点击某个问题之后执行算法储存ID
+      valueId: "", // 点击某个问题之后执行算法储存ID
       value: "",
-      workIndex: "", //执行算法存储当前index
+      workIndex: "", // 执行算法存储当前index
       yizhixing: [],
       zhengzaizhixing: [],
-      //查看结果遮罩层
+      // 查看结果遮罩层
       dialogVisible1: false,
-      resultId: "" //点击查看结果之后储存Id
+      resultId: "", // 点击查看结果之后储存Id
+      currentPage: 1,
+      pageSize: 10,
+      total: 0
     }
   },
   methods: {
@@ -181,7 +179,7 @@ export default {
         .then(function(response) {
           console.log(11111111111111111)
           console.log(response)
-          if (response.data.status == 0) {
+          if (response.data.status === 0) {
             that.$notify({
               title: "警告",
               message:
@@ -205,15 +203,47 @@ export default {
 添加项目
 */
     addPrograme(value) {
-      //console.log(value)
+      // console.log(value)
       this.loadAllData()
       // console.log(value);
     },
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`)
     },
-    handleCurrentChange(val) {
-      loadAllData(val)
+    handleCurrentChange() {
+      let that = this
+      console.log("handleCurrentChange")
+      that.$axios
+        .get(that.$url + "/question/getQuestions", {
+          params: {
+            userId: sessionStorage.getItem("userId"),
+            currentPage: that.currentPage,
+            pageSize: that.pageSize
+          }
+        })
+        .then(function(res) {
+          if (res.data.status === 0) {
+            let value = res.data.object
+            that.list = value
+            // console.log(that.list);
+            let tableData = []
+            for (let i in value) {
+              // console.log(value[i]);
+              tableData.unshift(that.dealData(value[i]))
+            }
+            that.tableData = tableData
+            // this.tableData.unshift(value)
+          } else {
+            that.$notify({
+              title: "警告",
+              message: res.data.msg,
+              type: "warning"
+            })
+          }
+        })
+        .catch(function(error) {
+          console.log(error)
+        })
     },
     /*
 跳转准备数据界面
@@ -226,7 +256,7 @@ export default {
       })
     },
 
-    //数据处理
+    // 数据处理
     dealData(value) {
       console.log(parseInt(value.processState))
       console.log(parseInt(value.geneticExecuted))
@@ -244,7 +274,7 @@ export default {
           resultsState: ""
         }
         return a
-      } else if (parseInt(value.processState) == 1) {
+      } else if (parseInt(value.processState) === 1) {
         let a = {
           id: value.questionId,
           questionName: value.questionName,
@@ -350,7 +380,7 @@ export default {
           that.loadAllData() // 重新加载数据
         }, 3000)
       } else {
-        that.$notify({
+        this.$notify({
           title: "警告",
           message: "已经计算完成，请勿重复计算",
           type: "warning"
@@ -428,7 +458,7 @@ export default {
       that.dialogVisible = true
       // 未执行的算法
       that.$axios
-        .get(that.$url + "/getNotExecutingAlgorithm", {
+        .get(that.$url + "/getNotExecuteAlgorithm", {
           params: {
             questionId: that.tableData[index].id
           }
@@ -470,7 +500,7 @@ export default {
       let that = this
       // 未执行的算法
       that.$axios
-        .get(that.$url + "/getNotExecutingAlgorithm", {
+        .get(that.$url + "/getNotExecuteAlgorithm", {
           params: {
             questionId: that.valueId
           }
@@ -546,6 +576,12 @@ export default {
             console.log(error)
           })
       }
+      for (let i in this.options) {
+        if (this.options[i] === this.value) {
+          this.options.splice(i, i + 1)
+        }
+      }
+      this.value = null
       console.log(that.value)
     },
     // 停止执行某个算法
@@ -626,8 +662,8 @@ export default {
         .get(that.$url + "/question/getQuestions", {
           params: {
             userId: sessionStorage.getItem("userId"),
-            currentPage: page,
-            pageSize: 10
+            currentPage: this.currentPage,
+            pageSize: this.pageSize
           }
         })
         .then(function(response) {
@@ -640,6 +676,7 @@ export default {
               // console.log(value[i]);
               that.tableData.unshift(that.dealData(value[i]))
             }
+            that.total = response.data.total
             // this.tableData.unshift(value)
           } else {
             that.$notify({
@@ -713,7 +750,26 @@ export default {
 .mouseIn {
   cursor: pointer;
 }
-.waitToChoose:hover {
+.waitToChoose {
   color: blue;
+  text-decoration: underline;
+  text-underline-position: below;
+  cursor: pointer;
+}
+.no-algorithm {
+  margin-bottom: 30px;
+  font-weight: bold;
+  font-size: larger;
+}
+.result-item {
+  padding: 12px 6px;
+  border-top: 1px solid #E5E7E9;
+}
+.result-item-last {
+  border-bottom: 1px solid #E5E7E9;
+}
+.result-item-1 {}
+.result-item-2 {
+  float: right;
 }
 </style>

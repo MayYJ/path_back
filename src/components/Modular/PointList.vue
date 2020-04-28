@@ -7,9 +7,9 @@
       </el-button>
     </div>
     <!-- 中心点 -->
-    <div class="templateImportBox">
+    <!-- <div class="templateImportBox">
       <el-tag class="editor" @click="handleOpenConfigCenterNode">设置中心点</el-tag>
-    </div>
+    </div>-->
     <el-dialog title="设置中心点服务点" :visible.sync="dialogVisible">
       <el-transfer
         class="transfer"
@@ -28,31 +28,38 @@
     </el-dialog>
 
     <el-dialog
-      title="提示"
+      title="导入操作 "
       :visible.sync="centerDialogVisible"
       width="30%"
       center
       style="font-family:PingFang SC"
     >
-      <el-upload
-        class="upload-demo"
-        ref="upload"
-        :action="excelUp"
-        :on-preview="handlePreview"
-        :on-remove="handleRemove"
-        :file-list="fileList"
-        :auto-upload="false"
-        :on-change="handleChange"
-      >
-        <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-        <el-button
-          style="margin-left: 10px;"
-          size="small"
-          type="success"
-          @click="submitUpload"
-        >上传到服务器</el-button>
-        <div slot="tip" class="el-upload__tip">上传文件</div>
-      </el-upload>
+      <div style="margin-bottom: 20px;">
+        <span>点击<a :href="$url + '/node/downloadNodeFile'">下载</a></span>点模板文件
+      </div>
+      <el-divider></el-divider>
+      <div>
+          <el-upload
+          class="upload-demo"
+          ref="upload"
+          :action="excelUp"
+          :on-preview="handlePreview"
+          :on-remove="handleRemove"
+          :file-list="fileList"
+          :auto-upload="false"
+          :on-change="handleChange"
+        >
+          <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+          <el-button
+            style="margin-left: 10px;"
+            size="small"
+            type="success"
+            @click="submitUpload"
+          >上传到服务器</el-button>
+          <div slot="tip" class="el-upload__tip">上传文件</div>
+        </el-upload>
+      </div>
+
       <span slot="footer" class="dialog-footer">
         <el-button @click="centerDialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="centerDialogVisible = false">确 定</el-button>
@@ -62,8 +69,9 @@
     <el-table
       :data="tableData"
       ref="multipleTable"
-      style="cursor: pointer;width: 780px;margin:0px auto;"
+      style="cursor: pointer;width: 900px;margin:0px auto;"
     >
+      <el-table-column type="index"></el-table-column>
       <el-table-column label="地址名称" width="140">
         <template slot-scope="scope">
           <span @click="toSingePoint(scope.row)">{{ scope.row.nodeName }}</span>
@@ -100,7 +108,21 @@
       <el-table-column label="操作">
         <template slot-scope="scope">
           <!-- <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button> -->
-          <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+          <div>
+            <el-button
+              size="mini"
+              type="primary"
+              :class="{'not-show': scope.row.isCenter === 1}"
+              @click="updateNode(scope.$index, 1)"
+            >设为中心点</el-button>
+            <el-button
+              size="mini"
+              type="primary"
+              :class="{'not-show': scope.row.isCenter === 0}"
+              @click="updateNode(scope.$index, 0)"
+            >设为服务点</el-button>
+            <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+          </div>
         </template>
       </el-table-column>
     </el-table>
@@ -111,10 +133,10 @@
       background
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
-      :current-page.sync="currentPage"
-      :page-size="100"
       layout="prev, pager, next, jumper"
-      :total="1000"
+      :current-page.sync="currentPage"
+      :page-size="pageSize"
+      :total="total"
     ></el-pagination>
     <footer-footer />
   </div>
@@ -127,6 +149,8 @@ export default {
   data() {
     return {
       currentPage: 1,
+      pageSize: 10,
+      total: 0,
       excelUp: "", // excel导点
       centerDialogVisible: false,
       dialogVisible: false, // 中心点
@@ -208,7 +232,29 @@ export default {
       console.log(`每页 ${val} 条`)
     },
     handleCurrentChange(val) {
-      console.log(`当前页: ${val}`)
+      let that = this
+      that.$axios
+        .get(that.$url + "/node/getQuestionNodes", {
+          params: {
+            questionId: that.questionId,
+            currentPage: that.currentPage,
+            pageSize: that.pageSize
+          }
+        })
+        .then(res => {
+          if (res.data.status === 0) {
+            that.tableData = res.data.object
+          } else {
+            that.$notify({
+              title: "警告",
+              message: res.data.msg,
+              type: "warning"
+            })
+          }
+          console.log(res)
+          that.tableData = res.data.object
+        })
+        .then(data => {})
     },
     /*
 跳转准备数据界面
@@ -245,12 +291,15 @@ export default {
       this.$axios
         .get(this.$url + "/node/getQuestionNodes", {
           params: {
-            questionId: that.questionId
+            questionId: that.questionId,
+            currentPage: that.currentPage,
+            pageSize: that.pageSize
           }
         })
         .then(res => {
           if (res.data.status === 0) {
             // 显示为服务点
+            that.total = res.data.total
             for (let i in that.tableData) {
               if (that.tableData[i].isCenter === 1) {
                 that.rightValue.push(parseInt(i))
@@ -295,7 +344,9 @@ export default {
       this.$axios
         .get(this.$url + "/node/getQuestionNodes", {
           params: {
-            questionId: this.questionId
+            questionId: this.questionId,
+            currentPage: this.currentPage,
+            pageSize: this.pageSize
           }
         })
         .then(res => {
@@ -417,6 +468,30 @@ export default {
           nodeAddress: row.nodeAddress
         }
       })
+    },
+    downloadNodeTemplate() {
+      let that = this
+      that.$axios
+        .get(that.$url + "/node/downloadNodeFile", { responseType: "blob" })
+        .then(res => {
+          const content = res
+          const blob = new Blob([content])
+          const fileName = "测试表格123.xlsx"
+          if ("download" in document.createElement("a")) {
+            // 非IE下载
+            const elink = document.createElement("a")
+            elink.download = fileName
+            elink.style.display = "none"
+            elink.href = URL.createObjectURL(blob)
+            document.body.appendChild(elink)
+            elink.click()
+            URL.revokeObjectURL(elink.href) // 释放URL 对象
+            document.body.removeChild(elink)
+          } else {
+            // IE10+下载
+            navigator.msSaveBlob(blob, fileName)
+          }
+        })
     }
   },
   beforeCreate() {},
@@ -460,5 +535,8 @@ export default {
 .pagination {
   margin-top: 30px;
   margin-bottom: 100px;
+}
+.el-button + .el-button {
+  margin-left: 0px;
 }
 </style>
