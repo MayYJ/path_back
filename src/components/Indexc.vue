@@ -27,7 +27,7 @@
           <span
             class="mouseIn"
             @click="workDistance(scope.$index, scope.row)"
-            :class="{'waitToChoose': scope.row.checkDataState !== '计算完成', 'disabled': scope.row.checkDataState === '计算完成'}"
+            :class="{'waitToChoose': scope.row.checkDataState === '开始', 'disabled': scope.row.checkDataState !== '开始'}"
           >{{ scope.row.checkDataState }}</span>
         </template>
       </el-table-column>
@@ -105,7 +105,7 @@
         <el-table-column width="150">
           <template slot-scope="scope">
             <span class="mouseIn" style="display:none">{{ scope.row.key }}</span>
-            <span class="mouseIn" @click="stopcarry(scope.$index, scope.row)">停止</span>
+            <!-- <span class="mouseIn" @click="stopcarry(scope.$index, scope.row)">停止</span> -->
           </template>
         </el-table-column>
       </el-table>
@@ -114,7 +114,7 @@
     <!-- 查看结果遮罩层 -->
     <el-dialog title="算法结果详情" :visible.sync="dialogVisible1" width="350px">
       <ul style="list-style-type: none; padding: 0px">
-        <li v-for="item,index in yizhixing" >
+        <li v-for="item,index in yizhixing">
           <div class="result-item" :class="{'result-item-last': index === yizhixing.length-1}">
             <span class="mouseIn result-item-1">{{item.value}}</span>
             <span class="waitToChoose result-item-2" @click="checkAlgorithm(index, item)">查看</span>
@@ -306,9 +306,9 @@ export default {
         }
         return a
       } else if (
-        parseInt(value.simpleExecuted) === 8 ||
-        parseInt(value.geneticExecuted) === 6 ||
-        parseInt(value.newGeneticExecuted) === 10
+        parseInt(value.simpleExecuted) === 2 ||
+        parseInt(value.geneticExecuted) === 2 ||
+        parseInt(value.newGeneticExecuted) === 2
       ) {
         let a = {
           id: value.questionId,
@@ -319,7 +319,10 @@ export default {
           resultsState: "查看结果"
         }
         return a
-      } else if (parseInt(value.processState) === 4) {
+      } else if (
+        parseInt(value.processState) === 4 ||
+        parseInt(value.processState) === 5
+      ) {
         console.log("sdafdsafdasfds")
         let a = {
           id: value.questionId,
@@ -539,7 +542,6 @@ export default {
     // 执行某个算法
     implement() {
       let that = this
-      console.log(that.valueId)
       that.$notify({
         title: "成功",
         message: "正在执行算法,请稍后",
@@ -556,6 +558,20 @@ export default {
           .then(function(response) {
             console.log(response)
             if (response.data.status === 0) {
+              let value
+              that.options.forEach((item, index, arr) => {
+                if (item.value === that.value) {
+                  value = item.label
+                }
+              })
+              that.zhengzaizhixing.push({key: that.value, value: value})
+              for (let index in that.options) {
+                if (that.options[index].value === that.value) {
+                  that.options.splice(index, 1)
+                  break
+                }
+              }
+              that.value = null
               // that.$notify({
               //   title: "成功",
               //   message: "执行算法完成,请刷新界面",
@@ -581,7 +597,6 @@ export default {
           this.options.splice(i, i + 1)
         }
       }
-      this.value = null
       console.log(that.value)
     },
     // 停止执行某个算法
@@ -750,12 +765,6 @@ export default {
 .mouseIn {
   cursor: pointer;
 }
-.waitToChoose {
-  color: blue;
-  text-decoration: underline;
-  text-underline-position: below;
-  cursor: pointer;
-}
 .no-algorithm {
   margin-bottom: 30px;
   font-weight: bold;
@@ -763,12 +772,13 @@ export default {
 }
 .result-item {
   padding: 12px 6px;
-  border-top: 1px solid #E5E7E9;
+  border-top: 1px solid #e5e7e9;
 }
 .result-item-last {
-  border-bottom: 1px solid #E5E7E9;
+  border-bottom: 1px solid #e5e7e9;
 }
-.result-item-1 {}
+.result-item-1 {
+}
 .result-item-2 {
   float: right;
 }

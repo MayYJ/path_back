@@ -17,3 +17,9 @@
 .not-show {
   display: none;
 }
+.waitToChoose {
+  color: blue;
+  text-decoration: underline;
+  text-underline-position: below;
+  cursor: pointer;
+}

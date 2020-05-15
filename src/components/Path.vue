@@ -83,10 +83,10 @@
             <span>{{ scope.row.totalDis }}米</span>
           </template>
         </el-table-column>
-        <el-table-column label="地址">
+        <el-table-column label="操作">
           <template slot-scope="scope">
             <span style="display:none">{{ scope.row.key }}</span>
-            <span class="mouseIn" @click="getDetail(scope.$index, scope.row)">查看</span>
+            <span class="mouseIn waitToChoose" @click="getDetail(scope.$index, scope.row)">查看</span>
           </template>
         </el-table-column>
       </el-table>

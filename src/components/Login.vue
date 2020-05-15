@@ -111,26 +111,15 @@ export default {
               userName: res.data.object.userName
             });
             this.$router.push({ path: "/" });
-          } else if (res.data.status == 1) {
-            this.$alert("用户名、密码或验证码错误!", "通知", {
-              confirmButtonText: "我知道了",
-              type: "error"
-            });
-          } else if (res.data.status == 3) {
-            this.$alert("验证码错误或为空！", "通知", {
-              confirmButtonText: "我知道了",
-              type: "error"
-            });
-            this.verifyCode(); //再次请求验证码
           } else {
-            this.$alert("登录失败！", "通知", {
-              confirmButtonText: "我知道了",
+            this.$alert(res.data.msg, "通知", {
+              confirmButtonText: "确定",
               type: "error"
             });
           }
         });
     },
-    submitForm (formName) {
+    submitForm (formName) {  
       let that = this;
       this.$refs[formName].validate(valid => {
         if (valid) {
